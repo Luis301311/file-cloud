@@ -1,39 +1,41 @@
-const express = require('express');
-const path = require('path');
-const multer = require('multer');
+import express from 'express';
+import multer from 'multer';
+import { dirname, extname, join } from 'path';
+import { fileURLToPath } from 'url';
 
-const app = express();
-const port = 3000;
+const PORT = 3000;
+const CURRENT_DIR = dirname(fileURLToPath(import.meta.url));
+const MIMETYPES = ['image/jpeg', 'image/png'];
 
-// Configura Multer para manejar la subida de archivos
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, './docs'); // Directorio donde se guardarán los archivos subidos
+const multerUpload = multer({
+    storage: multer.diskStorage({
+        destination: join(CURRENT_DIR, './uploads'),
+        filename: (req, file, cb) => {
+            const fileExtension = extname(file.originalname);
+            const fileName = file.originalname.split(fileExtension)[0];
+
+            cb(null, `${fileName}-${Date.now()}${fileExtension}`);
+        },
+    }),
+/*     fileFilter: (req, file, cb) => {
+        if (MIMETYPES.includes(file.mimetype)) cb(null, true);
+        else cb(new Error(`Only ${MIMETYPES.join(' ')} mimetypes are allowed`));
+    }, */
+    limits: {
+        fieldSize: 10000000,
     },
-    filename: (req, file, cb) => {
-        cb(null, file.originalname); // Utiliza el nombre original del archivo
-    }
-});
-const upload = multer({ storage: storage });
-
-// Ruta para subir archivos
-/* app.post('/upload', upload.single('file'), (req, res) => {
-    res.send('Archivo subido correctamente');
-});
- */
-app.post('/upload', upload.single('file'), (req, res) => {
-    // Obtenemos la ruta del archivo subido
-    const rutaArchivo = path.join(__dirname, req.file.path);
-    
-    // Enviamos la ruta del archivo como parte de la respuesta
-    res.send(`Archivo subido correctamente. Ruta: ${rutaArchivo}`);
 });
 
+const expressApp = express();
 
-// Configura Express para servir archivos estáticos desde el directorio '/ruta/del/archivo/subido'
-app.use('/archivos', express.static('./docs'));
+expressApp.post('/upload', multerUpload.single('file'), (req, res) => {
+    console.log(req.file.filename);
+    const file = req.file.filename; 
+    res.status(200).json({ filename: file });
+});
 
-// Inicia el servidor en el puerto 3000
-app.listen(port, () => {
-    console.log(`Servidor en ejecución en el puerto ${port}`);
+expressApp.use('/public', express.static(join(CURRENT_DIR, './uploads')));
+
+expressApp.listen(PORT, () => {
+    console.log(`Servidor levantado en el puerto ${PORT}`);
 });
