@@ -2,7 +2,7 @@ import express, { response } from 'express';
 import multer from 'multer';
 import { dirname, extname, join } from 'path';
 import { fileURLToPath } from 'url';
-import constroller from './constroller.js'
+//import constroller from './constroller.js'
 import dotenv from 'dotenv';
 import { error } from 'console';
 dotenv.config()
@@ -17,7 +17,7 @@ const multerUpload = multer({
             const fileExtension = extname(file.originalname);
             const fileName = file.originalname.split(fileExtension)[0];
 
-            cb(null, `${fileName}-${Date.now()}${fileExtension}`);
+            cb(null, `${fileName.replace(/\s+/g, '')}-${Date.now()}${fileExtension}`);
         },
     }),
 /*     fileFilter: (req, file, cb) => {
@@ -32,19 +32,22 @@ const multerUpload = multer({
 const expressApp = express();
 
 expressApp.post('/upload', multerUpload.single('file'), async (req, res) => {
-    constroller.add(req.file)
+    const serverUrl = `${req.protocol}://${req.get('host')}/public/${req.file.filename}`;
+    req.file.Url = serverUrl; 
+    /*     constroller.add(req.file)
     .then(response =>{
         res.status(200).json(req.file);
     })
     .catch(err =>{
         res.status(500); 
-    })
+    }) */
     
-
+    res.status(200).json(req.file);
 });
-
+//Middleware
 expressApp.use('/public', express.static(join(CURRENT_DIR, './uploads')));
 
 expressApp.listen(PORT, () => {
     console.log(`Servidor levantado en el puerto ${PORT}`);
 });
+

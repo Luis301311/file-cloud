@@ -54,8 +54,27 @@ function add(table, data){
     });
 }
 
+
+
+function getById(table, id){
+    return new Promise((resolve, reject)=>{
+        connection.query(`SELECT * FROM ${table} WHERE ?`, [id], (err, result)=>{
+            if (err) {
+                reject(err);
+            } else {
+                if (result.length > 0) {
+                    resolve(result[0]);
+                } else {
+                    const error = new Error();
+                    reject(error);
+                }
+            }
+        });
+    });
+}
 const db ={
     add, 
     getAll, 
+    getById, 
 }
  export default db; 
