@@ -8,7 +8,7 @@ const port = 3000;
 // Configura Multer para manejar la subida de archivos
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, '/docs'); // Directorio donde se guardarán los archivos subidos
+        cb(null, './docs'); // Directorio donde se guardarán los archivos subidos
     },
     filename: (req, file, cb) => {
         cb(null, file.originalname); // Utiliza el nombre original del archivo
@@ -31,7 +31,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
 
 // Configura Express para servir archivos estáticos desde el directorio '/ruta/del/archivo/subido'
-app.use('/archivos', express.static('/docs'));
+app.use('/archivos', express.static('./docs'));
 
 // Inicia el servidor en el puerto 3000
 app.listen(port, () => {
