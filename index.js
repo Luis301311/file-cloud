@@ -1,9 +1,12 @@
-import express from 'express';
+import express, { response } from 'express';
 import multer from 'multer';
 import { dirname, extname, join } from 'path';
 import { fileURLToPath } from 'url';
-
-const PORT = 3000;
+import constroller from './constroller.js'
+import dotenv from 'dotenv';
+import { error } from 'console';
+dotenv.config()
+const PORT = 3000 || process.env.PORT;
 const CURRENT_DIR = dirname(fileURLToPath(import.meta.url));
 const MIMETYPES = ['image/jpeg', 'image/png'];
 
@@ -28,10 +31,16 @@ const multerUpload = multer({
 
 const expressApp = express();
 
-expressApp.post('/upload', multerUpload.single('file'), (req, res) => {
-    console.log(req.file.filename);
-    const file = req.file.filename; 
-    res.status(200).json({ filename: file });
+expressApp.post('/upload', multerUpload.single('file'), async (req, res) => {
+    constroller.add(req.file)
+    .then(response =>{
+        res.status(200).json(req.file);
+    })
+    .catch(err =>{
+        res.status(500); 
+    })
+    
+
 });
 
 expressApp.use('/public', express.static(join(CURRENT_DIR, './uploads')));
