@@ -15,9 +15,14 @@ const table = 'files';
         return err;
     }
 }
+function getAll(){
+    return db.getAll(table);
+}
+
 
 const constroller = {
     add, 
+    getAll,
 }
 export default constroller; 
 //save

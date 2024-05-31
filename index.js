@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import constroller from './constroller.js'
 import dotenv from 'dotenv';
 dotenv.config()
-const PORT = 3000 || process.env.PORT;
+const PORT = 8080 || process.env.PORT;
 const CURRENT_DIR = dirname(fileURLToPath(import.meta.url));
 const MIMETYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
@@ -31,20 +31,34 @@ const multerUpload = multer({
 const expressApp = express();
 
 expressApp.post('/upload', multerUpload.single('file'), async (req, res) => {
-    try{
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No se ha proporcionado ningún archivo' });
+        }
+
         const fileNameWithoutExt = req.file.filename.split('.').slice(0, -1).join('.');
         const timestamp = fileNameWithoutExt.split('-').pop();
         const serverUrl = `${req.protocol}://${req.get('host')}/public/${req.file.filename}`;
         req.file.Url = serverUrl; 
         req.file.Id_file = timestamp;   
-        const item = await constroller.add(req.file)
-        if(item){
-            res.status(200).json(item);
+        const item = await constroller.add(req.file);
+        
+        if (item) {
+            return res.status(200).json(item);
+        } else {
+            return res.status(500).json({ error: 'No se pudo agregar el archivo' });
         }
-    }catch(err){
-        res.status(500).json(err);
+    } catch (err) {
+        // Manejar cualquier error que ocurra durante el procesamiento
+        console.error('Error al procesar la solicitud:', err);
+        return res.status(500).json({ error: 'Ocurrió un error interno' });
     }
 });
+expressApp.get('/',async (req, res) => {
+    const item = await constroller.getAll();
+    return res.status(200).json(item);
+});
+
 //Middleware
 expressApp.use('/public', express.static(join(CURRENT_DIR, './uploads')));
 
