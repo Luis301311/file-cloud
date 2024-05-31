@@ -2,9 +2,8 @@ import express, { response } from 'express';
 import multer from 'multer';
 import { dirname, extname, join } from 'path';
 import { fileURLToPath } from 'url';
-//import constroller from './constroller.js'
+import constroller from './constroller.js'
 import dotenv from 'dotenv';
-import { error } from 'console';
 dotenv.config()
 const PORT = 3000 || process.env.PORT;
 const CURRENT_DIR = dirname(fileURLToPath(import.meta.url));
@@ -32,17 +31,17 @@ const multerUpload = multer({
 const expressApp = express();
 
 expressApp.post('/upload', multerUpload.single('file'), async (req, res) => {
-    const serverUrl = `${req.protocol}://${req.get('host')}/public/${req.file.filename}`;
-    req.file.Url = serverUrl; 
-    /*     constroller.add(req.file)
-    .then(response =>{
-        res.status(200).json(req.file);
-    })
-    .catch(err =>{
-        res.status(500); 
-    }) */
-    
-    res.status(200).json(req.file);
+    try{
+        const fileNameWithoutExt = req.file.filename.split('.').slice(0, -1).join('.');
+        const timestamp = fileNameWithoutExt.split('-').pop();
+        const serverUrl = `${req.protocol}://${req.get('host')}/public/${req.file.filename}`;
+        req.file.Url = serverUrl; 
+        req.file.Id_file = timestamp;   
+        constroller.add(req.file)
+        res.status(200).json('Operation completed successfully');
+    }catch(err){
+        res.status(500).json(err);
+    }
 });
 //Middleware
 expressApp.use('/public', express.static(join(CURRENT_DIR, './uploads')));
