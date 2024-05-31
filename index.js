@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 dotenv.config()
 const PORT = 3000 || process.env.PORT;
 const CURRENT_DIR = dirname(fileURLToPath(import.meta.url));
-const MIMETYPES = ['image/jpeg', 'image/png'];
+const MIMETYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
 const multerUpload = multer({
     storage: multer.diskStorage({
@@ -37,8 +37,10 @@ expressApp.post('/upload', multerUpload.single('file'), async (req, res) => {
         const serverUrl = `${req.protocol}://${req.get('host')}/public/${req.file.filename}`;
         req.file.Url = serverUrl; 
         req.file.Id_file = timestamp;   
-        constroller.add(req.file)
-        res.status(200).json('Operation completed successfully');
+        const item = await constroller.add(req.file)
+        if(item){
+            res.status(200).json(item);
+        }
     }catch(err){
         res.status(500).json(err);
     }

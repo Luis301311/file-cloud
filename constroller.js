@@ -1,6 +1,6 @@
 import db from "./db/mysql.js";
 const table = 'files'; 
-function add(file){
+ async function add(file){
     const  data = {
         Id_file : file.Id_file,
         Url : file.Url,
@@ -8,7 +8,12 @@ function add(file){
         mimetype : file.mimetype,
         originalname : file.originalname
     }; 
-    return db.add(table,data); 
+    try {
+        const result = await db.add(table, data);
+        return data;
+    } catch (err) {
+        return err;
+    }
 }
 
 const constroller = {
