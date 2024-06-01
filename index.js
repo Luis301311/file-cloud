@@ -54,7 +54,7 @@ expressApp.post('/upload', multerUpload.single('file'), async (req, res) => {
         return res.status(500).json({ error: 'Ocurrió un error interno' });
     }
 });
-expressApp.get('/',async (req, res) => {
+expressApp.get('/all',async (req, res) => {
     const item = await constroller.getAll();
     return res.status(200).json(item);
 });
