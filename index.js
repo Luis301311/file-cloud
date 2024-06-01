@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import constroller from './constroller.js'
 import dotenv from 'dotenv';
 dotenv.config()
-const PORT = 8080 || process.env.PORT;
+const PORT = 3000 || process.env.PORT;
 const CURRENT_DIR = dirname(fileURLToPath(import.meta.url));
 const MIMETYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
